@@ -1599,6 +1599,13 @@ void ILibAsyncSocket_PreSelect(void* socketModule,fd_set *readset, fd_set *write
 			}
 		}
 
+		// A timeout callback can disconnect this socket while SendLock is released.
+		if (module->internalSocket == -1)
+		{
+			ILibSpinLock_UnLock(&(module->SendLock));
+			return;
+		}
+
 		if (module->PAUSE < 0) *blocktime = 0;
 		if (module->FinConnect == 0)
 		{
